@@ -5,6 +5,7 @@ import { apiClient } from "../client";
 class CartsService {
   private getHistoryEndpoint = API_CONFIG.endpoints.Carts.getHistory;
   private entryEndpoint = API_CONFIG.endpoints.Carts.entry;
+  private exitEndpoint = API_CONFIG.endpoints.Carts.exit;
 
   async getHistory(): Promise<History[]> {
     return apiClient.get<History[]>(this.getHistoryEndpoint);
@@ -12,6 +13,10 @@ class CartsService {
 
   async entry(data: Entry): Promise<void> {
     return apiClient.post<void>(this.entryEndpoint, data);
+  }
+
+  async exit(folio: string): Promise<void> {
+    return apiClient.patch<void>(`${this.exitEndpoint}${folio}`);
   }
 }
 
