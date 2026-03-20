@@ -1,28 +1,18 @@
 import { useState } from "react";
-import type { CartLog } from "../../types/types";
-import { CheckCircle, Package, Truck } from "lucide-react";
+import { CheckCircle, Package, Truck, Loader2 } from "lucide-react";
 import { Modal } from "../../components/Modal/Modal";
 import { EntryForm } from "../../components/EntryForm/EntryForm";
+import { useCarts } from "../../hooks/useCarts";
+import { formatDate } from "../../utils/formatDate";
 
 export const CartDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [logs] = useState<CartLog[]>([
-    {
-      id: 1,
-      folio: "MESA-A102",
-      type: "Grande",
-      entryDate: "2026-03-18T08:30:00",
-      status: "En planta",
-    },
-    {
-      id: 2,
-      folio: "MESA-B205",
-      type: "Chico",
-      entryDate: "2026-03-18T07:15:00",
-      exitDate: "2026-03-18T09:45:00",
-      status: "Completado",
-    },
-  ]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { history, isLoading, refresh } = useCarts();
+
+  const filteredHistory = history.filter((log) =>
+    log.folio.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">
@@ -37,9 +27,8 @@ export const CartDashboard = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white 
-          px-4 py-2 rounded-lg font-medium transition-all shadow-md
-          hover:cursor-pointer"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 
+          py-2 rounded-lg font-medium transition-all shadow-md hover:cursor-pointer"
         >
           + Nueva entrada
         </button>
@@ -47,18 +36,22 @@ export const CartDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <StatCard
-          title="Total"
-          value={8}
+          title="Total Activos"
+          value={history.filter((h) => h.status === "InPlant").length}
           icon={<Truck className="text-blue-500" />}
         />
         <StatCard
-          title="Total de carritos chicos"
-          value={7}
+          title="Carritos Chicos"
+          value={
+            history.filter(
+              (h) => h.cartTypeName === "Chico" && h.status === "InPlant",
+            ).length
+          }
           icon={<Package className="text-indigo-500" />}
         />
         <StatCard
-          title="Salidas de hoy"
-          value={12}
+          title="Salidas de Hoy"
+          value={history.filter((h) => h.status === "Completed").length}
           icon={<CheckCircle className="text-green-500" />}
         />
       </div>
@@ -71,71 +64,104 @@ export const CartDashboard = () => {
           <input
             type="text"
             placeholder="Buscar folio..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-200 rounded-md px-3 py-1 text-sm 
             focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full text-left">
             <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4">Folio</th>
-                <th className="px-6 py-4">Tipo</th>
-                <th className="px-6 py-4">Detalles de entrada</th>
-                <th className="px-6 py-4">Detalles de salida</th>
-                <th className="px-6 py-4">Estatus</th>
-                <th className="px-6 py-4">Acciones</th>
+                <th className="px-6 py-4 text-center">Tipo</th>
+                <th className="px-6 py-4 text-center">Detalles de entrada</th>
+                <th className="px-6 py-4 text-center">Detalles de salida</th>
+                <th className="px-6 py-4 text-center">Estatus</th>
+                <th className="px-6 py-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
-              {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {log.folio}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        log.type === "Grande"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {log.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {new Date(log.entryDate).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {log.exitDate
-                      ? new Date(log.exitDate).toLocaleString()
-                      : "—"}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`flex items-center gap-1.5 ${
-                        log.status === "En planta"
-                          ? "text-green-600"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      <span
-                        className={`w-2 h-2 rounded-full ${log.status === "En planta" ? "bg-green-500" : "bg-gray-300"}`}
-                      />
-                      {log.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {log.status === "En planta" && (
-                      <button className="text-blue-600 hover:underline font-medium hover:cursor-pointer">
-                        Registrar salida
-                      </button>
-                    )}
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2 text-gray-400">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                      <p className="font-medium">Cargando movimientos...</p>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : filteredHistory.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-gray-400"
+                  >
+                    No se encontraron registros.
+                  </td>
+                </tr>
+              ) : (
+                filteredHistory.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 font-bold text-gray-900">
+                      {log.folio}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          log.cartTypeName === "Grande"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-purple-100 text-purple-700"
+                        }`}
+                      >
+                        {log.cartTypeName}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-center text-gray-600">
+                      {formatDate(log.entryDate)}
+                    </td>
+
+                    <td className="px-6 py-4 text-center text-gray-600">
+                      {formatDate(log.exitDate)}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1.5 font-medium ${
+                          log.status === "InPlant"
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${log.status === "InPlant" ? "bg-green-500" : "bg-gray-300"}`}
+                        />
+                        {log.status === "InPlant" ? "En Planta" : "Completado"}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      {log.status === "InPlant" && (
+                        <button
+                          className="text-blue-600 hover:text-blue-800 font-bold hover:underline cursor-pointer transition-colors"
+                          onClick={() =>
+                            alert(`Registrar salida de: ${log.folio}`)
+                          }
+                        >
+                          Registrar salida
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -149,6 +175,7 @@ export const CartDashboard = () => {
         <EntryForm
           onSuccess={() => {
             setIsModalOpen(false);
+            refresh();
           }}
           onCancel={() => setIsModalOpen(false)}
         />
