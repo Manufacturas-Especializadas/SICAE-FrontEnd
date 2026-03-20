@@ -11,7 +11,7 @@ interface Props {
 
 export const EntryForm = ({ onSuccess, onCancel }: Props) => {
   const [folio, setFolio] = useState("");
-  const [type, setType] = useState<CartSize>("Grande");
+  const [type, setType] = useState<CartSize>(1);
   const today = new Date().toLocaleDateString();
 
   const { registerEntry, isLoading } = useCartEntry();
@@ -23,7 +23,7 @@ export const EntryForm = ({ onSuccess, onCancel }: Props) => {
 
     const entryData: Entry = {
       folio: folio.trim().toUpperCase(),
-      cartTypeId: type === "Grande" ? 0 : 1,
+      cartTypeId: type === 1 ? 0 : 2,
     };
 
     await registerEntry(entryData, () => {
