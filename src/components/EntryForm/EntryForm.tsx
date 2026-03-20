@@ -23,7 +23,7 @@ export const EntryForm = ({ onSuccess, onCancel }: Props) => {
 
     const entryData: Entry = {
       folio: folio.trim().toUpperCase(),
-      cartTypeId: type === 1 ? 0 : 2,
+      cartTypeId: type,
     };
 
     await registerEntry(entryData, () => {
