@@ -46,11 +46,20 @@ export const CartDashboard = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
           title="Total Activos"
           value={history.filter((h) => h.status === "InPlant").length}
           icon={<Truck className="text-blue-500" />}
+        />
+        <StatCard
+          title="Carritos Grandes"
+          value={
+            history.filter(
+              (h) => h.cartTypeName === "Grande" && h.status === "InPlant",
+            ).length
+          }
+          icon={<Package className="text-indigo-500" />}
         />
         <StatCard
           title="Carritos Chicos"
