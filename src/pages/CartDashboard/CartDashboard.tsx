@@ -4,13 +4,25 @@ import { Modal } from "../../components/Modal/Modal";
 import { EntryForm } from "../../components/EntryForm/EntryForm";
 import { useCarts } from "../../hooks/useCarts";
 import { formatDate } from "../../utils/formatDate";
+import { useCartExit } from "../../hooks/useCartExit";
 
 export const CartDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [selectedFolio, setSelectedFolio] = useState<string | null>(null);
   const { history, isLoading, refresh } = useCarts();
+  const { registerExit, isExiting } = useCartExit(() => {
+    setIsConfirmOpen(false);
+    refresh();
+  });
+
+  const handleOpenConfirm = (folio: string) => {
+    setSelectedFolio(folio);
+    setIsConfirmOpen(true);
+  };
 
   const filteredHistory = history.filter((log) =>
     log.folio.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -172,9 +184,7 @@ export const CartDashboard = () => {
                       {log.status === "InPlant" && (
                         <button
                           className="text-blue-600 hover:text-blue-800 font-bold hover:underline cursor-pointer transition-colors"
-                          onClick={() =>
-                            alert(`Registrar salida de: ${log.folio}`)
-                          }
+                          onClick={() => handleOpenConfirm(log.folio)}
                         >
                           Registrar salida
                         </button>
@@ -245,6 +255,51 @@ export const CartDashboard = () => {
           }}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        title="Confirmar Salida"
+      >
+        <div className="p-2">
+          <div
+            className="flex items-center gap-3 text-amber-600 mb-4 bg-amber-50 p-3 
+            rounded-lg border border-amber-100"
+          >
+            <Package size={24} />
+            <p className="font-medium">
+              Estás a punto de registrar la salida de este carrito.
+            </p>
+          </div>
+
+          <p className="text-gray-600 mb-6">
+            ¿Confirmas que el carrito con folio{" "}
+            <span className="font-bold text-gray-900">{selectedFolio}</span> ha
+            salido de la planta? Esta acción registrará la hora actual y no se
+            puede deshacer.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsConfirmOpen(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg 
+              text-gray-600 hover:bg-gray-50 font-medium transition-colors
+              hover:cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              disabled={isExiting}
+              onClick={() => selectedFolio && registerExit(selectedFolio)}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg 
+              font-bold hover:bg-blue-700 shadow-md transition-all active:scale-95 
+              disabled:opacity-50 hover:cursor-pointer"
+            >
+              {isExiting ? "Procesando..." : "Sí, registrar salida"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
