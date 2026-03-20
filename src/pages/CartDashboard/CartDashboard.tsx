@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CartLog, CartSize } from "../../types/types";
+import type { CartLog } from "../../types/types";
 import { CheckCircle, Package, Truck } from "lucide-react";
 import { Modal } from "../../components/Modal/Modal";
 import { EntryForm } from "../../components/EntryForm/EntryForm";
@@ -24,10 +24,6 @@ export const CartDashboard = () => {
     },
   ]);
 
-  const handleNewEntry = (data: { folio: string; type: CartSize }) => {
-    console.log("Saving to SQL via API:", data);
-    setIsModalOpen(false);
-  };
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">
       <div className="flex justify-between items-center mb-8">
@@ -151,7 +147,9 @@ export const CartDashboard = () => {
         title="Nueva entrada de carrito - MESA"
       >
         <EntryForm
-          onSubmit={handleNewEntry}
+          onSuccess={() => {
+            setIsModalOpen(false);
+          }}
           onCancel={() => setIsModalOpen(false)}
         />
       </Modal>
