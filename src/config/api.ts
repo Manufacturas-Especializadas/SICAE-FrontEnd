@@ -8,6 +8,7 @@ export const API_CONFIG = {
   baseUrl: API_BASE_URL,
   endpoints: {
     Carts: {
+      getHistory: "/api/Carts/history",
       entry: "/api/Carts/entry",
     },
   },
