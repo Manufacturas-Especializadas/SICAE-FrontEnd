@@ -10,6 +10,7 @@ export const API_CONFIG = {
     Carts: {
       getHistory: "/api/Carts/history",
       entry: "/api/Carts/entry",
+      exit: "/api/Carts/exit/",
     },
   },
 };
