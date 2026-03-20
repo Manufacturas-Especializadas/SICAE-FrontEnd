@@ -1,4 +1,4 @@
-export type CartSize = "Grande" | "Chico";
+export type CartSize = 1 | 2;
 
 export type CartStatus = "En planta" | "Completado";
 
@@ -14,4 +14,13 @@ export interface CartLog {
 export interface Entry {
   folio: string;
   cartTypeId: number;
+}
+
+export interface History {
+  id: number;
+  folio: string;
+  cartTypeName: string;
+  entryDate: string;
+  exitDate: string | null;
+  status: string;
 }
