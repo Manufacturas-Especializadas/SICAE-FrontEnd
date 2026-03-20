@@ -8,11 +8,23 @@ import { formatDate } from "../../utils/formatDate";
 export const CartDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const { history, isLoading, refresh } = useCarts();
 
   const filteredHistory = history.filter((log) =>
     log.folio.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">
@@ -65,7 +77,7 @@ export const CartDashboard = () => {
             type="text"
             placeholder="Buscar folio..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="border border-gray-200 rounded-md px-3 py-1 text-sm 
             focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -103,7 +115,7 @@ export const CartDashboard = () => {
                   </td>
                 </tr>
               ) : (
-                filteredHistory.map((log) => (
+                currentItems.map((log) => (
                   <tr
                     key={log.id}
                     className="hover:bg-gray-50 transition-colors"
@@ -164,6 +176,51 @@ export const CartDashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <p className="text-sm text-gray-500">
+            Mostrando{" "}
+            <span className="font-medium">{indexOfFirstItem + 1}</span> a{" "}
+            <span className="font-medium">
+              {Math.min(indexOfLastItem, filteredHistory.length)}
+            </span>{" "}
+            de <span className="font-medium">{filteredHistory.length}</span>{" "}
+            resultados
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Anterior
+            </button>
+            <div className="flex items-center gap-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-600 hover:bg-white border border-transparent hover:border-gray-300"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       </div>
 
