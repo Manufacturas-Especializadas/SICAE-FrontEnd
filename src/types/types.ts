@@ -10,3 +10,8 @@ export interface CartLog {
   exitDate?: string;
   status: CartStatus;
 }
+
+export interface Entry {
+  folio: string;
+  cartTypeId: number;
+}
