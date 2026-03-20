@@ -8,8 +8,8 @@ interface Props {
 
 export const Selector = ({ selected, onChange }: Props) => {
   const options: { id: CartSize; icon: React.ReactNode; label: string }[] = [
-    { id: "Grande", icon: <Truck size={24} />, label: "Carrito Grande" },
-    { id: "Chico", icon: <Package size={24} />, label: "Carrito Chico" },
+    { id: 1, icon: <Truck size={24} />, label: "Carrito Grande" },
+    { id: 2, icon: <Package size={24} />, label: "Carrito Chico" },
   ];
 
   return (
