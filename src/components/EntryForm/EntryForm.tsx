@@ -1,23 +1,35 @@
 import { useState, type SyntheticEvent } from "react";
-import type { CartSize } from "../../types/types";
+import type { CartSize, Entry } from "../../types/types";
 import { Input } from "../CustomInputs/Input";
 import { Selector } from "../CustomInputs/Selector";
+import { useCartEntry } from "../../hooks/useCartEntry";
 
 interface Props {
-  onSubmit: (data: { folio: string; type: CartSize }) => void;
+  onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const EntryForm = ({ onSubmit, onCancel }: Props) => {
+export const EntryForm = ({ onSuccess, onCancel }: Props) => {
   const [folio, setFolio] = useState("");
-  const [type, setType] = useState<CartSize>("Grande");
+  const [type, setType] = useState<CartSize>(1);
   const today = new Date().toLocaleDateString();
 
-  const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
+  const { registerEntry, isLoading } = useCartEntry();
+
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!folio.trim()) return alert("Porfa vor ingrese un folio");
-    onSubmit({ folio, type });
+    if (!folio.trim()) return;
+
+    const entryData: Entry = {
+      folio: folio.trim().toUpperCase(),
+      cartTypeId: type,
+    };
+
+    await registerEntry(entryData, () => {
+      setFolio("");
+      onSuccess();
+    });
   };
 
   return (
@@ -30,6 +42,7 @@ export const EntryForm = ({ onSubmit, onCancel }: Props) => {
           label="Folio"
           value={folio}
           onChange={(e) => setFolio(e.target.value.toUpperCase())}
+          disabled={isLoading}
         />
       </div>
       <div>
@@ -42,6 +55,7 @@ export const EntryForm = ({ onSubmit, onCancel }: Props) => {
         <button
           type="button"
           onClick={onCancel}
+          disabled={isLoading}
           className="flex-1 px-4 py-3 border border-gray-300 
           rounded-lg font-medium text-gray-600 hover:bg-gray-50 transition-colors
           hover:cursor-pointer"
@@ -50,6 +64,7 @@ export const EntryForm = ({ onSubmit, onCancel }: Props) => {
         </button>
         <button
           type="submit"
+          disabled={isLoading}
           className="flex-1 px-4 py-3 bg-blue-600 text-white 
           rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all 
           active:scale-95 hover:cursor-pointer"
