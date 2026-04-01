@@ -1,5 +1,10 @@
 import { API_CONFIG } from "../../config/api";
-import type { AvailableMonth, Entry, History } from "../../types/types";
+import type {
+  AvailableMonth,
+  CartUpdate,
+  Entry,
+  History,
+} from "../../types/types";
 import { apiClient } from "../client";
 
 class CartsService {
@@ -9,6 +14,7 @@ class CartsService {
   private reportEndpoint = API_CONFIG.endpoints.Carts.report;
   private entryEndpoint = API_CONFIG.endpoints.Carts.entry;
   private exitEndpoint = API_CONFIG.endpoints.Carts.exit;
+  private updateEndpoint = API_CONFIG.endpoints.Carts.update;
 
   async getHistory(): Promise<History[]> {
     return apiClient.get<History[]>(this.getHistoryEndpoint);
@@ -31,6 +37,10 @@ class CartsService {
 
   async exit(folio: string): Promise<void> {
     return apiClient.patch<void>(`${this.exitEndpoint}${folio}`);
+  }
+
+  async update(id: number, data: CartUpdate): Promise<void> {
+    return apiClient.put<void>(`${this.updateEndpoint}${id}`, data);
   }
 }
 
