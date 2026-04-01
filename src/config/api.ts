@@ -13,6 +13,7 @@ export const API_CONFIG = {
       availabelMonths: "/api/Carts/available-months",
       entry: "/api/Carts/entry",
       exit: "/api/Carts/exit/",
+      update: "/api/Carts/update/",
     },
   },
 };
