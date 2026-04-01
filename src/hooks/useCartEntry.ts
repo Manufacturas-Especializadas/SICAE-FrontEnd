@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Entry } from "../types/types";
+import type { CartUpdate, Entry } from "../types/types";
 import toast from "react-hot-toast";
 import { cartsService } from "../api/services/CartsService";
 
@@ -29,8 +29,28 @@ export const useCartEntry = () => {
     }
   };
 
+  const updateEntry = async (
+    id: number,
+    data: CartUpdate,
+    onSuccess?: () => void,
+  ) => {
+    setIsLoading(true);
+    const toastId = toast.loading("Actualizando registro...");
+    try {
+      await cartsService.update(id, data);
+      toast.success("¡Registro actualizado!", { id: toastId });
+      if (onSuccess) onSuccess();
+    } catch (error: any) {
+      const msg = error.response?.data?.message || "Error al actualizar";
+      toast.error(msg, { id: toastId });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     registerEntry,
+    updateEntry,
     isLoading,
   };
 };
