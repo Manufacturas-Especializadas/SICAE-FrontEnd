@@ -9,6 +9,7 @@ export const API_CONFIG = {
   endpoints: {
     Carts: {
       getHistory: "/api/Carts/history",
+      report: "/api/Carts/report/",
       entry: "/api/Carts/entry",
       exit: "/api/Carts/exit/",
     },
