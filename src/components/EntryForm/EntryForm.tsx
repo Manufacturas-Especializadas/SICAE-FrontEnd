@@ -1,5 +1,5 @@
 import { useState, type SyntheticEvent } from "react";
-import type { CartSize, Entry } from "../../types/types";
+import type { CartSize, CartUpdate, History } from "../../types/types";
 import { Input } from "../CustomInputs/Input";
 import { Selector } from "../CustomInputs/Selector";
 import { useCartEntry } from "../../hooks/useCartEntry";
@@ -7,36 +7,51 @@ import { useCartEntry } from "../../hooks/useCartEntry";
 interface Props {
   onSuccess: () => void;
   onCancel: () => void;
+  initialData?: History | null;
 }
 
-export const EntryForm = ({ onSuccess, onCancel }: Props) => {
-  const [folio, setFolio] = useState("");
-  const [type, setType] = useState<CartSize>(1);
-  const today = new Date().toLocaleDateString();
+export const EntryForm = ({ onSuccess, onCancel, initialData }: Props) => {
+  const [folio, setFolio] = useState(initialData?.folio || "");
+  const [type, setType] = useState<CartSize>(
+    initialData?.cartTypeName === "Grande" ? 1 : 2,
+  );
 
-  const { registerEntry, isLoading } = useCartEntry();
+  const isEditing = !!initialData;
+  const { registerEntry, updateEntry, isLoading } = useCartEntry();
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!folio.trim()) return;
 
-    const entryData: Entry = {
+    const updateData: CartUpdate = {
       folio: folio.trim().toUpperCase(),
       cartTypeId: type,
     };
 
-    await registerEntry(entryData, () => {
-      setFolio("");
-      onSuccess();
-    });
+    if (isEditing && initialData) {
+      await updateEntry(initialData.id, updateData, onSuccess);
+    } else {
+      await registerEntry(updateData, () => {
+        setFolio("");
+        onSuccess();
+      });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <Input label="Fecha de entrada (Auto)" value={today} disabled />
+      <div className={isEditing ? "opacity-50" : ""}>
+        <Input
+          label={isEditing ? "Fecha Original" : "Fecha de entrada (Auto)"}
+          value={
+            isEditing
+              ? new Date(initialData!.entryDate).toLocaleString()
+              : new Date().toLocaleDateString()
+          }
+          disabled
+        />
       </div>
+
       <div>
         <Input
           label="Folio"
@@ -45,31 +60,37 @@ export const EntryForm = ({ onSuccess, onCancel }: Props) => {
           disabled={isLoading}
         />
       </div>
+
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">
-          Seleccionar tipo de carro
+          Tipo de carro
         </label>
         <Selector selected={type} onChange={setType} />
       </div>
+
       <div className="flex gap-3 pt-4">
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1 px-4 py-3 border border-gray-300 
-          rounded-lg font-medium text-gray-600 hover:bg-gray-50 transition-colors
-          hover:cursor-pointer"
+          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
         >
-          Cancel
+          Cancelar
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 px-4 py-3 bg-blue-600 text-white 
-          rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all 
-          active:scale-95 hover:cursor-pointer"
+          className={`flex-1 px-4 py-3 text-white rounded-lg font-bold shadow-lg transition-all active:scale-95 cursor-pointer ${
+            isEditing
+              ? "bg-amber-500 hover:bg-amber-600 shadow-amber-100"
+              : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+          }`}
         >
-          Registrar entrada
+          {isLoading
+            ? "Procesando..."
+            : isEditing
+              ? "Guardar Cambios"
+              : "Registrar entrada"}
         </button>
       </div>
     </form>
