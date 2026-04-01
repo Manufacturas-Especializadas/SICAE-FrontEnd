@@ -24,3 +24,10 @@ export interface History {
   exitDate: string | null;
   status: string;
 }
+
+export interface AvailableMonth {
+  year: number;
+  month: number;
+  monthName: string;
+  displayName: string;
+}
