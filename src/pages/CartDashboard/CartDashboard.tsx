@@ -5,6 +5,7 @@ import { EntryForm } from "../../components/EntryForm/EntryForm";
 import { useCarts } from "../../hooks/useCarts";
 import { formatDate } from "../../utils/formatDate";
 import { useCartExit } from "../../hooks/useCartExit";
+import { useNavigate } from "react-router-dom";
 
 export const CartDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +33,7 @@ export const CartDashboard = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
+  const navigate = useNavigate();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -49,13 +51,22 @@ export const CartDashboard = () => {
             Panel de seguimiento de carritos en tiempo real
           </p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 
-          py-2 rounded-lg font-medium transition-all shadow-md hover:cursor-pointer"
-        >
-          + Nueva entrada
-        </button>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => navigate("/reportes")}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 
+            py-2 rounded-lg font-medium transition-all shadow-md hover:cursor-pointer"
+          >
+            Reportes
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 
+            py-2 rounded-lg font-medium transition-all shadow-md hover:cursor-pointer"
+          >
+            + Nueva entrada
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
