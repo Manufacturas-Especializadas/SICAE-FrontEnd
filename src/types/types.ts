@@ -31,3 +31,8 @@ export interface AvailableMonth {
   monthName: string;
   displayName: string;
 }
+
+export interface CartUpdate {
+  folio: string;
+  cartTypeId: number;
+}
