@@ -6,6 +6,7 @@ import { useCarts } from "../../hooks/useCarts";
 import { formatDate } from "../../utils/formatDate";
 import { useCartExit } from "../../hooks/useCartExit";
 import { useNavigate } from "react-router-dom";
+import type { History } from "../../types/types";
 
 export const CartDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,12 +14,23 @@ export const CartDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [selectedCart, setSelectedCart] = useState<History | null>(null);
   const [selectedFolio, setSelectedFolio] = useState<string | null>(null);
   const { history, isLoading, refresh } = useCarts();
   const { registerExit, isExiting } = useCartExit(() => {
     setIsConfirmOpen(false);
     refresh();
   });
+
+  const handleEdit = (cart: History) => {
+    setSelectedCart(cart);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCart(null);
+  };
 
   const handleOpenConfirm = (folio: string) => {
     setSelectedFolio(folio);
@@ -193,12 +205,22 @@ export const CartDashboard = () => {
 
                     <td className="px-6 py-4 text-center">
                       {log.status === "InPlant" && (
-                        <button
-                          className="text-blue-600 hover:text-blue-800 font-bold hover:underline cursor-pointer transition-colors"
-                          onClick={() => handleOpenConfirm(log.folio)}
-                        >
-                          Registrar salida
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            className="text-blue-600 hover:text-blue-800 font-bold 
+                              hover:underline cursor-pointer transition-colors"
+                            onClick={() => handleOpenConfirm(log.folio)}
+                          >
+                            Registrar salida
+                          </button>
+                          <button
+                            className="text-amber-600 hover:text-amber-800 
+                            font-bold hover:underline cursor-pointer transition-colors"
+                            onClick={() => handleEdit(log)}
+                          >
+                            Editar datos
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -256,10 +278,15 @@ export const CartDashboard = () => {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Nueva entrada de carrito - MESA"
+        onClose={handleCloseModal}
+        title={
+          selectedCart
+            ? "Editar información del carrito"
+            : "Nueva entrada de carrito - MESA"
+        }
       >
         <EntryForm
+          initialData={selectedCart}
           onSuccess={() => {
             setIsModalOpen(false);
             refresh();
