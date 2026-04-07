@@ -106,7 +106,7 @@ export const CartDashboard = () => {
           icon={<Package className="text-indigo-500" />}
         />
         <StatCard
-          title="Salidas de Hoy"
+          title="Salidas de Totales"
           value={history.filter((h) => h.status === "Completed").length}
           icon={<CheckCircle className="text-green-500" />}
         />
