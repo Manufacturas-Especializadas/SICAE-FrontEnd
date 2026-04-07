@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import {
   ArrowLeft,
-  CalendarDays,
+  // CalendarDays,
   Download,
   FileText,
   Loader2,
@@ -39,7 +39,7 @@ export const ReportsIndex = () => {
             </h1>
           </div>
 
-          <button
+          {/* <button
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 
             text-white rounded-lg font-semibold text-xs hover:bg-emerald-700 
             transition-all shadow-sm active:scale-95 cursor-pointer"
@@ -47,7 +47,7 @@ export const ReportsIndex = () => {
           >
             <CalendarDays size={14} />
             REPORTE POR FECHAS
-          </button>
+          </button> */}
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200">
